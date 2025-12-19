@@ -7,18 +7,18 @@ import (
 
 	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/database"
 	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/models"
-
 	"github.com/gin-gonic/gin"
-
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var movieCollection *mongo.Collection = database.OpenCollection("movies")
+var validate = validator.New()
 
 func GetMovies() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 
 		var movies []models.Movie
@@ -52,5 +52,37 @@ func GetMovie() gin.HandlerFunc {
 		}
 		var movie models.Movie
 
+		err := movieCollection.FindOne(ctx, bson.M{"imdb_id": movieID}).Decode(&movie)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Movie not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, movie)
+	}
+}
+
+func AddMovie() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		var movie models.Movie
+		if err := c.ShouldBindJSON(&movie); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON provided"})
+			return
+		}
+		if err := validate.Struct(&movie); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Validation Failed", "details": err.Error()})
+			return
+		}
+
+		result, err := movieCollection.InsertOne(ctx, movie)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error occurred while adding movie"})
+			return
+		}
+		c.JSON(http.StatusCreated, result)
 	}
 }
