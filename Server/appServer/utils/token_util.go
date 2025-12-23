@@ -10,6 +10,7 @@ import (
 	jwt "github.com/golang-jwt/jwt/v5"
 
 	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/database"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -38,6 +39,7 @@ func GenerateAllTokens(email, firstName, lastName, role, userID string) (string,
 			Issuer:    "MagicStream",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ID:        uuid.NewString(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -57,6 +59,7 @@ func GenerateAllTokens(email, firstName, lastName, role, userID string) (string,
 			Issuer:    "MagicStream",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * 7 * time.Hour)),
+			ID:        uuid.NewString(),
 		},
 	}
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
@@ -122,4 +125,18 @@ func ValidateToken(tokenString string) (*SignedDetails, error) {
 	}
 
 	return claims, nil
+}
+
+func GetUserIdFromContext(c *gin.Context) (string, error) {
+	userId, exists := c.Get("userId")
+	if !exists {
+		return "", errors.New("User Id not found in context")
+	}
+
+	id, ok := userId.(string)
+	if !ok {
+		return "", errors.New("unable to retrieve user Id")
+	}
+
+	return id, nil
 }
