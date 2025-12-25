@@ -1,21 +1,26 @@
-import { useState } from 'react'
-import './App.css'
-import Home from './components/home/Home'
-import Header from './components/header/Header'
-import Register from './components/register/Register'
-import Login from './components/login/Login'
-import { Route, Routes, useNavigate } from 'react-router-dom'
+import { useState } from "react";
+import "./App.css";
+import Home from "./components/home/Home";
+import Header from "./components/header/Header";
+import Register from "./components/register/Register";
+import Login from "./components/login/Login";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import Layout from "./components/Layout";
+import RequiredAuth from "./components/RequiredAuth";
 
 function App() {
   return (
     <>
-      <Header/>
-      <Routes>
-        <Route path='/' element={<Home/>}></Route>
-        <Route path='/register' element={<Register/>}></Route>
-        <Route path='/login' element={<Login/>}></Route>
+      <Header />
+      <Routes path="/" element={<Layout />}>
+        <Route path="/" element={<Home />}></Route>
+        <Route path="/register" element={<Register />}></Route>
+        <Route path="/login" element={<Login />}></Route>
+        <Route element={<RequiredAuth />}>
+          {/* <Route path="/recommended" element={<Recomended />}/>*/}
+        </Route>
       </Routes>
     </>
-  )
+  );
 }
-export default App
+export default App;
