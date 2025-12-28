@@ -16,24 +16,22 @@ import (
 )
 
 func main() {
-	// This is the main function
+	log.Println("Starting MagicStream API...")
+
+	// Load env (local only, Railway injects env automatically)
+	_ = godotenv.Load()
 
 	router := gin.Default()
 
+	// Health check / sanity endpoint
 	router.GET("/hello", func(c *gin.Context) {
 		c.String(200, "Hello, MagicStreamMovies!")
 	})
 
-	_ = godotenv.Load()
-
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Println("Warning: unable to find .env file")
-	// }
-
+	// ---- CORS ----
 	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
-
 	var origins []string
+
 	if allowedOrigins != "" {
 		origins = strings.Split(allowedOrigins, ",")
 		for i := range origins {
@@ -41,45 +39,61 @@ func main() {
 			log.Println("Allowed Origin:", origins[i])
 		}
 	} else {
-		origins = []string{"http://localhost:5173"}
-		log.Println("Allowed Origin: http://localhost:5173")
+		// SAFE DEFAULT for production demo
+		origins = []string{"*"}
+		log.Println("Allowed Origin: *")
 	}
 
-	config := cors.Config{}
-	config.AllowOrigins = origins
-	config.AllowMethods = []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"}
-	//config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
-	config.ExposeHeaders = []string{"Content-Length"}
-	config.AllowCredentials = true
-	config.MaxAge = 12 * time.Hour
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     origins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
-	router.Use(cors.New(config))
-	router.Use(gin.Logger())
+	// ---- MongoDB ----
+	var mongoClient *mongo.Client
+	var mongoAvailable bool = true
 
-	var client *mongo.Client = database.Connect()
+	log.Println("Connecting to MongoDB...")
+	mongoClient = database.Connect()
 
-	if err := client.Ping(context.Background(), nil); err != nil {
-		log.Fatalf("Failed to reach server: %v", err)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := mongoClient.Ping(ctx, nil); err != nil {
+		log.Println("WARNING: MongoDB unavailable, running without DB:", err)
+		mongoAvailable = false
 	}
-	defer func() {
-		err := client.Disconnect(context.Background())
-		if err != nil {
-			log.Fatalf("Failed to disconnect from MongoDB: %v", err)
-		}
 
-	}()
+	if mongoAvailable {
+		defer func() {
+			if err := mongoClient.Disconnect(context.Background()); err != nil {
+				log.Println("Mongo disconnect error:", err)
+			}
+		}()
+	}
 
-	routes.SetupUnProtectedRoutes(router, client)
-	routes.SetupProtectedRoutes(router, client)
+	// ---- Routes ----
+	routes.SetupUnProtectedRoutes(router, mongoClient)
 
+	if mongoAvailable {
+		routes.SetupProtectedRoutes(router, mongoClient)
+	} else {
+		log.Println("Protected routes disabled (MongoDB not connected)")
+	}
+
+	// ---- PORT (Railway REQUIRED) ----
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	if err := router.Run(":" + port); err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
+	log.Println("Server listening on port", port)
 
+	if err := router.Run(":" + port); err != nil {
+		log.Fatal("Server failed to start:", err)
+	}
 }
