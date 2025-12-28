@@ -2,11 +2,12 @@ import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
+import logo from "../../assets/movieStream-logo.png";
 
 import { useNavigate, NavLink, Link } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
-const Header = () => {
+const Header = ({ handleLogout }) => {
   const navigate = useNavigate();
   const { auth } = useAuth();
 
@@ -19,7 +20,16 @@ const Header = () => {
       className="shadow-sm"
     >
       <Container>
-        <Navbar.Brand>Movie Stream</Navbar.Brand>
+        <Navbar.Brand>
+          <img
+            alt=""
+            src={logo}
+            width="30"
+            height="30"
+            className="d-inline-block align-top me-2"
+          />
+          Movie Stream
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-navbar-nav" />
         <Navbar.Collapse>
           <Nav className="me-auto">
@@ -33,11 +43,15 @@ const Header = () => {
           <Nav className="ms-auto align-items-center">
             {auth ? (
               <>
-                <span>
+                <span className="me-3 text-light">
                   Hello, <strong>{auth.first_name}</strong>
                 </span>
-                <Button variant="outline-light" size="sm">
-                  LogOut
+                <Button
+                  variant="outline-light"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  Logout
                 </Button>
               </>
             ) : (

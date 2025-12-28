@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import axiosClient from "../../api/axiosConfig";
 import { useNavigate, Link } from "react-router-dom";
+import logo from "../../assets/movieStream-logo.png";
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -85,6 +86,7 @@ const Register = () => {
         style={{ maxWidth: 400, width: "100%" }}
       >
         <div className="text-center mb-4">
+          <img src={logo} alt="Movie Stream Logo" className="mb-2" />
           <h2 className="fw-bold">Register</h2>
           <p className="text-muted">Create your Movie Stream account.</p>
           {error && <div className="alert alert-danger py-2">{error}</div>}

@@ -5,6 +5,7 @@ import Form from "react-bootstrap/Form";
 import axiosClient from "../../api/axiosConfig";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import logo from "../../assets/movieStream-logo.png";
 
 const Login = () => {
   const { setAuth } = useAuth();
@@ -32,7 +33,7 @@ const Login = () => {
       // console.log(response.data);
       setAuth(response.data);
 
-      // localStorage.setItem('user', JSON.stringify(response.data));
+      localStorage.setItem("user", JSON.stringify(response.data));
       // Handle successful login (e.g., store token, redirect)
       navigate(from, { replace: true });
       //navigate('/');
@@ -50,6 +51,7 @@ const Login = () => {
         style={{ maxWidth: 400, width: "100%" }}
       >
         <div className="text-center mb-4">
+          <img src={logo} alt="Movie Stream Logo" className="mb-2" />
           <h2 className="fw-bold">Sign In</h2>
           <p className="text-muted">
             Welcome back! Please login to your account.
