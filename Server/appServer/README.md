@@ -1,4 +1,4 @@
-# MagicStream Backend 
+# MovieStream Backend 
 
 README ini merangkum fitur, arsitektur, environment variables, instruksi menjalankan, endpoint, dan catatan penting terkait backend yang ada di `Server/appServer`.
 
