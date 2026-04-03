@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
 
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/database"
+	"github.com/seymourrisey/Server/appServer/database"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"

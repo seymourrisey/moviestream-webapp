@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/database"
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/seymourrisey/Server/appServer/database"
+	"github.com/seymourrisey/Server/appServer/routes"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
