@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/GavinLonDigital/MagicStream/Server/MagicStreamServer/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/seymourrisey/Server/appServer/utils"
 )
 
 func AuthMiddleware() gin.HandlerFunc {

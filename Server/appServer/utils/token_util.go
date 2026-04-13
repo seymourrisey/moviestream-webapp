@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
 
-	"github.com/seymourrisey/Server/appServer/database"
 	"github.com/google/uuid"
+	"github.com/seymourrisey/Server/appServer/database"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -35,7 +35,7 @@ func GenerateAllTokens(email, firstName, lastName, role, userID string) (string,
 		Role:      role,
 		UserID:    userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "MagicStream",
+			Issuer:    "Moviestream",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			ID:        uuid.NewString(),
@@ -134,12 +134,12 @@ func ValidateToken(tokenString string) (*SignedDetails, error) {
 }
 
 func GetUserIdFromContext(c *gin.Context) (string, error) {
-	userId, exists := c.Get("userId")
+	userID, exists := c.Get("userID")
 	if !exists {
 		return "", errors.New("User Id not found in context")
 	}
 
-	id, ok := userId.(string)
+	id, ok := userID.(string)
 	if !ok {
 		return "", errors.New("unable to retrieve user Id")
 	}
